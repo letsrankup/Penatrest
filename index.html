@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PenTest Pro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#060a0f;color:#cdd9e5;font-family:'Courier New',monospace;min-height:100vh}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0a0f16}::-webkit-scrollbar-thumb{background:#00ff8840;border-radius:3px}
+.header{background:#0d1117;border-bottom:1px solid #00ff8820;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:34px;height:34px;background:#00ff8815;border:1px solid #00ff8840;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-title{color:#00ff88;font-weight:700;font-size:15px;letter-spacing:2px}
+.logo-sub{color:#444;font-size:10px}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.status-text{font-size:12px;color:#666;display:flex;align-items:center}
+.layout{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{width:220px;background:#0a0f16;border-right:1px solid #111827;padding:16px 0;overflow-y:auto;position:sticky;top:60px;height:calc(100vh - 60px)}
+.sidebar-label{padding:0 16px 10px;font-size:10px;color:#444;letter-spacing:2px}
+.tool-btn{width:100%;padding:10px 16px;background:transparent;border:none;border-left:3px solid transparent;color:#666;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:all 0.15s}
+.tool-btn:hover{color:#aaa;background:#0d111720}
+.tool-btn.active{background:#0d1117;color:#fff}
+.tool-icon{font-size:15px;min-width:20px}
+.tool-name{font-size:12px;font-weight:400}
+.tool-cat{font-size:10px;color:#444}
+.featured-badge{margin-left:auto;background:#e1700520;color:#e17005;padding:1px 5px;border-radius:4px;font-size:9px}
+.main{flex:1;padding:24px;overflow-y:auto}
+.dashboard-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px}
+.dashboard-sub{color:#666;font-size:13px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{background:#0d1117;border-radius:12px;padding:20px;cursor:pointer;text-align:left;transition:all 0.2s;width:100%}
+.card:hover{background:#111827}
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.card-emoji{font-size:22px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px}
+.card-name{color:#fff;font-weight:600;font-size:14px}
+.card-category{font-size:11px}
+.card-desc{color:#666;font-size:12px;line-height:1.6}
+.tool-view{display:none}
+.tool-view.active{display:block}
+.back-btn{background:none;border:none;color:#666;cursor:pointer;font-size:13px;padding:0 0 20px;display:flex;align-items:center;gap:6px;font-family:'Courier New',monospace}
+.tool-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.tool-header-icon{font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:12px}
+.tool-title{color:#fff;font-size:18px;font-weight:700;margin-bottom:4px}
+.tool-desc-text{color:#666;font-size:13px}
+.input-box{background:#0d1117;border-radius:12px;padding:20px;margin-bottom:20px}
+.input-label{color:#666;font-size:10px;letter-spacing:1px;display:block;margin-bottom:10px}
+.input-row{display:flex;gap:10px}
+.target-input{flex:1;background:#060a0f;border-radius:8px;padding:12px 16px;color:#fff;font-size:14px;font-family:'Courier New',monospace;outline:none}
+.scan-btn{border:none;border-radius:8px;padding:12px 24px;cursor:pointer;font-weight:700;font-size:13px;font-family:'Courier New',monospace;min-width:110px;transition:all 0.2s;color:#000}
+.scan-btn:disabled{background:#1a1a1a!important;color:#444;cursor:not-allowed}
+.loading-box{background:#0d1117;border-radius:12px;padding:32px;text-align:center;display:none}
+.loading-text{font-size:14px;margin-bottom:8px}
+.loading-sub{color:#444;font-size:12px}
+.error-box{background:#ff003010;border:1px solid #ff003030;border-radius:12px;padding:16px;display:none}
+.error-title{color:#ff0040;font-weight:600;margin-bottom:6px}
+.error-msg{color:#cdd9e5;font-size:13px;font-family:'Courier New',monospace}
+.result-box{background:#0d1117;border-radius:12px;padding:20px;display:none}
+.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #111827}
+.result-ok{color:#00ff88;font-size:13px}
+.result-time{color:#444;font-size:11px}
+.result-body{}
+.stat-row{display:flex;gap:16px;margin-bottom:16px}
+.stat-box{background:#0a0a0a;padding:12px 20px;border-radius:8px;text-align:center}
+.stat-val{font-size:24px;font-weight:700}
+.stat-lbl{font-size:11px;color:#666}
+.record-group{margin-bottom:14px}
+.record-type{font-size:12px;font-family:'Courier New',monospace;margin-bottom:6px}
+.record-item{background:#0a0a0a;padding:8px 12px;border-radius:6px;font-family:'Courier New',monospace;font-size:12px;color:#cdd9e5;margin-bottom:4px;border-left:3px solid #00ff88}
+.port-item{display:flex;align-items:center;gap:12px;background:#0a0a0a;padding:10px 14px;border-radius:6px;margin-bottom:6px;border-left:3px solid #00ff88}
+.port-num{color:#00ff88;font-family:'Courier New',monospace;width:60px}
+.port-status{background:#00ff8820;color:#00ff88;padding:2px 10px;border-radius:4px;font-size:12px}
+.port-svc{color:#cdd9e5;font-family:'Courier New',monospace;font-size:13px}
+.data-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #111;font-family:'Courier New',monospace;font-size:13px}
+.data-label{color:#666;min-width:160px}
+.data-val{color:#cdd9e5;word-break:break-all}
+.tag{padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-right:6px;margin-bottom:6px}
+.tags-row{margin-bottom:16px}
+.score-circle-wrap{display:flex;align-items:center;gap:16px;background:#0a0a0a;padding:16px;border-radius:10px;margin-bottom:16px}
+.header-miss{display:flex;justify-content:space-between;align-items:center;background:#0a0a0a;padding:10px 14px;border-radius:6px;margin-bottom:6px}
+.header-name{font-family:'Courier New',monospace;color:#cdd9e5;font-size:13px}
+.badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;color:#000}
+.tech-cat{margin-bottom:16px}
+.tech-cat-label{color:#a29bfe;font-size:11px;font-family:'Courier New',monospace;margin-bottom:8px;letter-spacing:1px}
+.tech-items{display:flex;flex-wrap:wrap;gap:8px}
+.tech-item{background:#0a0a0a;border:1px solid #a29bfe30;border-radius:8px;padding:8px 14px}
+.tech-name{color:#cdd9e5;font-size:13px;font-weight:600}
+.tech-ver{color:#666;font-size:11px}
+.grade-box{display:flex;align-items:center;gap:24px;background:#0a0a0a;padding:20px;border-radius:12px;margin-bottom:20px}
+.grade-letter{width:80px;height:80px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;font-family:'Courier New',monospace}
+.grade-score{color:#fff;font-size:24px;font-weight:700}
+.grade-lbl{color:#666;font-size:13px}
+.grade-issues{color:#ff6b35;font-size:13px;margin-top:4px}
+.issue-item{display:flex;justify-content:space-between;align-items:center;background:#0a0a0a;padding:10px 14px;border-radius:6px;margin-bottom:6px}
+.issue-text{color:#cdd9e5;font-size:13px}
+.history-section{padding:14px 16px 8px;border-top:1px solid #111827;margin-top:12px}
+.history-label{font-size:10px;color:#444;letter-spacing:2px;margin-bottom:10px}
+.history-item{padding:5px 0;font-size:11px;border-bottom:1px solid #0d1117}
+.history-top{display:flex;justify-content:space-between}
+.history-bot{color:#444;font-size:10px}
+.full-span{grid-column:1/-1}
+.empty{color:#666;text-align:center;padding:20px}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🔐</div>
+    <div>
+      <div class="logo-title">PENTEST PRO</div>
+      <div class="logo-sub">Self-Hosted · Vercel · No Paid APIs</div>
+    </div>
+  </div>
+  <div class="status-text">
+    <span class="status-dot" id="statusDot" style="background:#ffe66d"></span>
+    <span id="statusText">Checking...</span>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-label">TOOLS (10)</div>
+    <div id="toolList"></div>
+    <div id="historySection" style="display:none">
+      <div class="history-section">
+        <div class="history-label">HISTORY</div>
+        <div id="historyList"></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- Dashboard -->
+    <div id="dashboard">
+      <div class="dashboard-title">Security Toolkit</div>
+      <div class="dashboard-sub">Self-hosted · No paid APIs · Real live results</div>
+      <div class="grid" id="toolGrid"></div>
+    </div>
+
+    <!-- Tool View -->
+    <div id="toolView" style="display:none">
+      <button class="back-btn" onclick="showDashboard()">← Dashboard</button>
+      <div class="tool-header">
+        <div class="tool-header-icon" id="tvIcon"></div>
+        <div>
+          <div class="tool-title" id="tvName"></div>
+          <div class="tool-desc-text" id="tvDesc"></div>
+        </div>
+      </div>
+      <div class="input-box" id="inputBox">
+        <label class="input-label">TARGET</label>
+        <div class="input-row">
+          <input class="target-input" id="targetInput" placeholder="example.com" onkeydown="if(event.key==='Enter')runScan()"/>
+          <button class="scan-btn" id="scanBtn" onclick="runScan()">RUN SCAN</button>
+        </div>
+      </div>
+      <div class="loading-box" id="loadingBox">
+        <div class="loading-text" id="loadingText">⟳ Scanning...</div>
+        <div class="loading-sub" id="loadingSub">Please wait</div>
+      </div>
+      <div class="error-box" id="errorBox">
+        <div class="error-title">✗ Error</div>
+        <div class="error-msg" id="errorMsg"></div>
+      </div>
+      <div class="result-box" id="resultBox">
+        <div class="result-header">
+          <div class="result-ok" id="resultOk"></div>
+          <div class="result-time" id="resultTime"></div>
+        </div>
+        <div class="result-body" id="resultBody"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const TOOLS = [
+  {id:"dns",name:"DNS Lookup",icon:"🌐",category:"Reconnaissance",desc:"Full DNS record enumeration — A, MX, NS, TXT records",color:"#00ff88",placeholder:"example.com"},
+  {id:"portscan",name:"Port Scanner",icon:"🔌",category:"Network",desc:"TCP port scanner — detect open services & daemons",color:"#ff6b35",placeholder:"example.com or 1.2.3.4"},
+  {id:"ssl",name:"SSL/TLS Checker",icon:"🔒",category:"Cryptography",desc:"SSL certificate — expiry, cipher, issuer, vulnerabilities",color:"#4ecdc4",placeholder:"example.com"},
+  {id:"headers",name:"HTTP Headers",icon:"📋",category:"Web Security",desc:"Security header audit — CSP, HSTS, X-Frame scoring",color:"#ffe66d",placeholder:"example.com"},
+  {id:"whois",name:"WHOIS Lookup",icon:"📁",category:"Reconnaissance",desc:"Domain registration — registrar, owner, nameservers",color:"#a8edea",placeholder:"example.com"},
+  {id:"subdomains",name:"Subdomain Finder",icon:"🔍",category:"Reconnaissance",desc:"DNS brute-force subdomain enumeration",color:"#fed9b7",placeholder:"example.com"},
+  {id:"dirscan",name:"Dir Scanner",icon:"📂",category:"Web Security",desc:"Hidden directories, admin panels, config files",color:"#f7b731",placeholder:"example.com"},
+  {id:"techstack",name:"Tech Detector",icon:"⚙️",category:"Fingerprinting",desc:"CMS, frameworks, servers, JS libraries, CDNs",color:"#a29bfe",placeholder:"example.com"},
+  {id:"ipinfo",name:"IP Geolocation",icon:"📍",category:"Intelligence",desc:"Country, ISP, ASN, reverse DNS, proxy detection",color:"#fd79a8",placeholder:"example.com or IP"},
+  {id:"audit",name:"Full Security Audit",icon:"🛡️",category:"Comprehensive",desc:"Complete assessment — DNS + SSL + Headers + Grade",color:"#e17055",placeholder:"example.com",featured:true},
+];
+
+const SEV_COLOR = {CRITICAL:"#ff0040",HIGH:"#ff6b35",MEDIUM:"#ffe66d",LOW:"#00ff88"};
+let activeTool = null;
+let history = [];
+
+// Build sidebar
+const toolList = document.getElementById('toolList');
+TOOLS.forEach(t => {
+  const btn = document.createElement('button');
+  btn.className = 'tool-btn';
+  btn.id = 'sb_' + t.id;
+  btn.style.borderLeftColor = 'transparent';
+  btn.innerHTML = `<span class="tool-icon">${t.icon}</span><div style="flex:1"><div class="tool-name">${t.name}</div><div class="tool-cat">${t.category}</div></div>${t.featured?'<span class="featured-badge">ALL</span>':''}`;
+  btn.onclick = () => selectTool(t);
+  toolList.appendChild(btn);
+});
+
+// Build grid
+const grid = document.getElementById('toolGrid');
+TOOLS.forEach(t => {
+  const card = document.createElement('button');
+  card.className = 'card' + (t.featured ? ' full-span' : '');
+  card.style.border = `1px solid ${t.color}20`;
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-emoji" style="background:${t.color}15">${t.icon}</div>
+      <div>
+        <div class="card-name">${t.name}</div>
+        <div class="card-category" style="color:${t.color}">${t.category}</div>
+      </div>
+      ${t.featured?`<span style="margin-left:auto;background:${t.color}20;color:${t.color};padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600">FEATURED</span>`:''}
+    </div>
+    <div class="card-desc">${t.desc}</div>`;
+  card.onmouseenter = () => { card.style.borderColor = t.color+'60'; card.style.background='#111827'; };
+  card.onmouseleave = () => { card.style.borderColor = t.color+'20'; card.style.background='#0d1117'; };
+  card.onclick = () => selectTool(t);
+  grid.appendChild(card);
+});
+
+// Check API
+fetch('/api/health').then(r=>r.json()).then(()=>{
+  document.getElementById('statusDot').style.background='#00ff88';
+  document.getElementById('statusDot').style.boxShadow='0 0 8px #00ff88';
+  document.getElementById('statusText').textContent='API Online';
+}).catch(()=>{
+  document.getElementById('statusDot').style.background='#ff0040';
+  document.getElementById('statusText').textContent='API Offline';
+});
+
+function selectTool(t) {
+  activeTool = t;
+  // Sidebar highlight
+  TOOLS.forEach(x => {
+    const b = document.getElementById('sb_'+x.id);
+    b.classList.remove('active');
+    b.style.borderLeftColor = 'transparent';
+    b.style.color = '#666';
+    b.querySelector('.tool-name').style.fontWeight = '400';
+  });
+  const sb = document.getElementById('sb_'+t.id);
+  sb.classList.add('active');
+  sb.style.borderLeftColor = t.color;
+  sb.style.color = '#fff';
+  sb.querySelector('.tool-name').style.fontWeight = '600';
+
+  // Show tool view
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('toolView').style.display = 'block';
+  document.getElementById('tvIcon').textContent = t.icon;
+  document.getElementById('tvIcon').style.background = t.color+'15';
+  document.getElementById('tvIcon').style.border = `1px solid ${t.color}30`;
+  document.getElementById('tvName').textContent = t.name;
+  document.getElementById('tvDesc').textContent = t.desc;
+  document.getElementById('inputBox').style.border = `1px solid ${t.color}30`;
+  document.getElementById('targetInput').style.border = `1px solid ${t.color}20`;
+  document.getElementById('targetInput').placeholder = t.placeholder;
+  document.getElementById('targetInput').value = '';
+  document.getElementById('scanBtn').style.background = t.color;
+  document.getElementById('loadingText').style.color = t.color;
+  document.getElementById('resultBox').style.border = `1px solid ${t.color}20`;
+  hide('loadingBox'); hide('errorBox'); hide('resultBox');
+}
+
+function showDashboard() {
+  activeTool = null;
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('toolView').style.display = 'none';
+  TOOLS.forEach(x => {
+    const b = document.getElementById('sb_'+x.id);
+    b.classList.remove('active');
+    b.style.borderLeftColor = 'transparent';
+    b.style.color = '#666';
+  });
+  hide('loadingBox'); hide('errorBox'); hide('resultBox');
+}
+
+function show(id){ document.getElementById(id).style.display='block'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+
+async function runScan() {
+  if (!activeTool) return;
+  const target = document.getElementById('targetInput').value.trim();
+  if (!target) return;
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true; btn.textContent = 'RUNNING...';
+  hide('errorBox'); hide('resultBox');
+  show('loadingBox');
+  document.getElementById('loadingText').textContent = `⟳ Scanning ${target}...`;
+  document.getElementById('loadingSub').textContent = `Running ${activeTool.name}`;
+  const t0 = Date.now();
+  try {
+    const r = await fetch(`/api/tools/${activeTool.id}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({target})
+    });
+    const data = await r.json();
+    const elapsed = ((Date.now()-t0)/1000).toFixed(1);
+    hide('loadingBox');
+    if (!data.success) throw new Error(data.error || 'Scan failed');
+    document.getElementById('resultOk').textContent = `✓ Complete — ${data.target||target}`;
+    document.getElementById('resultTime').textContent = new Date().toLocaleTimeString();
+    document.getElementById('resultBody').innerHTML = renderResult(activeTool.id, data);
+    show('resultBox');
+    addHistory(activeTool.name, target, elapsed, true);
+  } catch(e) {
+    hide('loadingBox');
+    document.getElementById('errorMsg').textContent = e.message;
+    show('errorBox');
+    addHistory(activeTool.name, target, '—', false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'RUN SCAN';
+  }
+}
+
+function addHistory(tool, target, elapsed, ok) {
+  history.unshift({tool,target,elapsed,time:new Date().toLocaleTimeString(),ok});
+  if (history.length > 15) history.pop();
+  const sec = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  sec.style.display = 'block';
+  list.innerHTML = history.slice(0,7).map(h=>`
+    <div class="history-item">
+      <div class="history-top">
+        <span style="color:${h.ok?'#00ff88':'#ff6b35'}">${h.ok?'✓':'✗'} ${h.tool}</span>
+        <span style="color:#444">${h.elapsed}s</span>
+      </div>
+      <div class="history-bot">${h.target} · ${h.time}</div>
+    </div>`).join('');
+}
+
+function badge(level) {
+  return `<span class="badge" style="background:${SEV_COLOR[level]||'#666'}">${level}</span>`;
+}
+
+function dataRow(label, value, color) {
+  return `<div class="data-row"><span class="data-label">${label}</span><span class="data-val" style="color:${color||'#cdd9e5'}">${value||'N/A'}</span></div>`;
+}
+
+function renderResult(toolId, data) {
+  if (toolId === 'dns') {
+    let html = '';
+    Object.entries(data.records).forEach(([type, recs]) => {
+      if (!Array.isArray(recs) || recs.length === 0) return;
+      html += `<div class="record-group"><div class="record-type" style="color:#00ff88">[${type} Records]</div>`;
+      recs.forEach(r => { html += `<div class="record-item">${typeof r==='object'?JSON.stringify(r):String(r)}</div>`; });
+      html += '</div>';
+    });
+    return html || '<div class="empty">No DNS records found</div>';
+  }
+
+  if (toolId === 'portscan') {
+    const open = data.open_ports || [];
+    let html = `<div class="stat-row">
+      <div class="stat-box" style="border:1px solid #74b9ff30"><div class="stat-val" style="color:#74b9ff">${data.total_scanned}</div><div class="stat-lbl">Scanned</div></div>
+      <div class="stat-box" style="border:1px solid #00ff8830"><div class="stat-val" style="color:#00ff88">${open.length}</div><div class="stat-lbl">Open</div></div>
+    </div>`;
+    if (open.length === 0) return html + '<div class="empty">No open ports found</div>';
+    open.forEach(p => {
+      html += `<div class="port-item"><span class="port-num">${p.port}</span><span class="port-status">OPEN</span><span class="port-svc">${p.service}</span></div>`;
+    });
+    return html;
+  }
+
+  if (toolId === 'ssl') {
+    const s = data.ssl;
+    const sc = s.expired?'#ff0040':s.expiring_soon?'#ffe66d':'#00ff88';
+    let html = `<div class="tags-row">
+      <span class="tag" style="background:${sc}20;color:${sc};border:1px solid ${sc}50">${s.expired?'EXPIRED':s.expiring_soon?'EXPIRING SOON':'VALID'}</span>
+      <span class="tag" style="background:#74b9ff20;color:#74b9ff;border:1px solid #74b9ff50">${s.protocol||'TLS'}</span>
+      <span class="tag" style="background:${s.self_signed?'#ff6b3520':'#00ff8820'};color:${s.self_signed?'#ff6b35':'#00ff88'};border:1px solid #66666650">${s.self_signed?'SELF-SIGNED':'CA-SIGNED'}</span>
+    </div>`;
+    const rows = [['Subject CN',s.subject?.CN],['Issuer',s.issuer?.O||s.issuer?.CN],['Valid From',s.valid_from],['Valid To',s.valid_to],['Days Left',s.days_remaining],['Protocol',s.protocol],['Cipher',s.cipher?.name],['SAN',s.san]];
+    rows.forEach(([l,v]) => { if(v!=null) html += dataRow(l, String(v)); });
+    return html;
+  }
+
+  if (toolId === 'headers') {
+    const score = data.security_analysis?.score || 0;
+    const deg = score * 3.6;
+    let html = `<div class="score-circle-wrap">
+      <div style="width:60px;height:60px;border-radius:50%;background:conic-gradient(#00ff88 ${deg}deg,#1a2a1a 0deg);display:flex;align-items:center;justify-content:center">
+        <div style="width:46px;height:46px;border-radius:50%;background:#0d1117;display:flex;align-items:center;justify-content:center;color:#00ff88;font-weight:700;font-size:14px">${score}%</div>
+      </div>
+      <div><div style="color:#fff;font-size:16px;font-weight:600">Security Score</div><div style="color:#666;font-size:12px">Server: ${data.server||'Hidden'} · ${data.security_analysis?.missing?.length||0} missing</div></div>
+    </div>`;
+    (data.security_analysis?.missing||[]).forEach(m => {
+      const bc = m.severity==='HIGH'?'#ff6b35':m.severity==='MEDIUM'?'#ffe66d':'#666';
+      html += `<div class="header-miss" style="border-left:3px solid ${bc}"><span class="header-name">${m.name||m.header}</span>${badge(m.severity)}</div>`;
+    });
+    return html;
+  }
+
+  if (toolId === 'whois') {
+    let html = '';
+    Object.entries(data.parsed).forEach(([k,v]) => {
+      if (v) html += dataRow(k.replace(/_/g,' '), Array.isArray(v)?v.join(', '):String(v));
+    });
+    return html || '<div class="empty">No WHOIS data</div>';
+  }
+
+  if (toolId === 'subdomains') {
+    const found = data.subdomains || [];
+    let html = `<div class="stat-row">
+      <div class="stat-box" style="border:1px solid #74b9ff30"><div class="stat-val" style="color:#74b9ff">${data.total_checked}</div><div class="stat-lbl">Checked</div></div>
+      <div class="stat-box" style="border:1px solid #00ff8830"><div class="stat-val" style="color:#00ff88">${data.found_count}</div><div class="stat-lbl">Found</div></div>
+    </div>`;
+    if (found.length === 0) return html + '<div class="empty">No subdomains found</div>';
+    found.forEach(s => {
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;background:#0a0a0a;padding:10px 14px;border-radius:6px;margin-bottom:6px;border-left:3px solid #00ff88">
+        <span style="color:#00ff88;font-family:monospace;font-size:13px">${s.subdomain}</span>
+        <span style="color:#666;font-family:monospace;font-size:12px">${(s.ips||[]).join(', ')}</span>
+      </div>`;
+    });
+    return html;
+  }
+
+  if (toolId === 'dirscan') {
+    const paths = data.interesting_paths || [];
+    let html = `<div class="stat-row">
+      <div class="stat-box" style="border:1px solid #74b9ff30"><div class="stat-val" style="color:#74b9ff">${data.total_checked}</div><div class="stat-lbl">Checked</div></div>
+      <div class="stat-box" style="border:1px solid #ffe66d30"><div class="stat-val" style="color:#ffe66d">${data.interesting_count}</div><div class="stat-lbl">Interesting</div></div>
+    </div>`;
+    if (paths.length === 0) return html + '<div class="empty">Nothing interesting found</div>';
+    paths.forEach(p => {
+      const c = p.status===200?'#00ff88':p.status===403?'#ffe66d':p.status>=300&&p.status<400?'#74b9ff':'#ff6b35';
+      html += `<div style="display:flex;align-items:center;gap:12px;background:#0a0a0a;padding:10px 14px;border-radius:6px;margin-bottom:6px;border-left:3px solid ${c}">
+        <span style="background:${c}20;color:${c};padding:2px 10px;border-radius:4px;font-size:12px;font-family:monospace;min-width:44px;text-align:center">${p.status}</span>
+        <span style="color:#cdd9e5;font-family:monospace;font-size:13px">/${p.path}</span>
+      </div>`;
+    });
+    return html;
+  }
+
+  if (toolId === 'techstack') {
+    const bycat = data.by_category || {};
+    if (data.total_found === 0) return '<div class="empty">No technologies detected</div>';
+    let html = `<div style="color:#666;font-size:12px;margin-bottom:16px">${data.total_found} technologies detected</div>`;
+    Object.entries(bycat).forEach(([cat, techs]) => {
+      html += `<div class="tech-cat"><div class="tech-cat-label">── ${cat.toUpperCase()} ──</div><div class="tech-items">`;
+      techs.forEach(t => {
+        html += `<div class="tech-item"><div class="tech-name">${t.tech}</div>${t.version?`<div class="tech-ver">v${t.version}</div>`:''}</div>`;
+      });
+      html += '</div></div>';
+    });
+    return html;
+  }
+
+  if (toolId === 'ipinfo') {
+    const g = data.geolocation || {};
+    const rows = [
+      ['IP Address', data.resolved_ip],
+      ['Country', `${g.country||''} (${g.countryCode||''})`],
+      ['Region', g.regionName],['City', g.city],
+      ['Timezone', g.timezone],['ISP', g.isp],
+      ['Organization', g.org],['AS Number', g.as],
+      ['Coordinates', `${g.lat}, ${g.lon}`],
+      ['Reverse DNS', (data.reverse_dns||[]).join(', ')||'None'],
+      ['Proxy/VPN', g.proxy?'⚠️ YES':'No'],
+      ['Datacenter', g.hosting?'YES':'No'],
+    ];
+    let html = '';
+    rows.forEach(([l,v]) => { html += dataRow(l, String(v||'N/A'), l==='Proxy/VPN'&&g.proxy?'#ff6b35':null); });
+    return html;
+  }
+
+  if (toolId === 'audit') {
+    const gc = {A:'#00ff88',B:'#74b9ff',C:'#ffe66d',D:'#ff6b35',F:'#ff0040'};
+    const g = gc[data.grade]||'#666';
+    let html = `<div class="grade-box">
+      <div class="grade-letter" style="background:${g}20;border:2px solid ${g};color:${g}">${data.grade}</div>
+      <div>
+        <div class="grade-score">${data.security_score}<span style="color:#666;font-size:16px">/100</span></div>
+        <div class="grade-lbl">Security Score</div>
+        <div class="grade-issues">${data.total_issues} issues found</div>
+      </div>
+    </div>`;
+    if (!data.issues||data.issues.length===0) return html+'<div style="color:#00ff88;text-align:center;padding:20px;font-family:monospace">✓ No issues detected</div>';
+    data.issues.forEach(issue => {
+      const bc = SEV_COLOR[issue.severity]||'#666';
+      html += `<div class="issue-item" style="border-left:3px solid ${bc}"><span class="issue-text">${issue.issue}</span>${badge(issue.severity)}</div>`;
+    });
+    return html;
+  }
+
+  return `<pre style="background:#0a0a0a;color:#00ff88;padding:16px;border-radius:8px;font-size:12px;overflow:auto">${JSON.stringify(data,null,2)}</pre>`;
+}
+</script>
+</body>
+</html>
