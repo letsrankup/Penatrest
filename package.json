@@ -1,8 +1,4 @@
 {
   "name": "pentest-pro",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "echo 'No build needed'",
-    "dev": "npx serve ."
-  }
+  "version": "1.0.0"
 }
